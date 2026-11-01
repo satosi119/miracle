@@ -31,7 +31,7 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
-            margin-top: 20px; /* 상단 여백 */
+            margin-top: 20px;
         }
 
         /* 헤더 박스 */
@@ -168,12 +168,10 @@
         .btn-copy { background-color: #4c566a; color: #fff; }
         .btn-close-modal { background-color: #3b4252; color: #fff; margin-top: 5px; }
 
-        /* =================================================== */
-        /* [스크롤 가능한 명단 테이블 영역 및 하단 여백 설정] */
-        /* =================================================== */
+        /* 스크롤 가능한 명단 테이블 영역 */
         .table-scroll-container {
-            max-height: 260px; /* 세로 높이를 제한하여 스크롤 생성 */
-            overflow-y: auto;  /* 위아래 드래그(스크롤) 가능 */
+            max-height: 260px;
+            overflow-y: auto;
             margin-top: 10px;
             border: 1px solid #2e3440;
             border-radius: 8px;
@@ -289,7 +287,7 @@
     </div>
 </div>
 
-<!-- [모달 3] 시민용 - 동의 현황 및 명단 확인 모달 (스크롤 + 하단 공백 3개 포함) -->
+<!-- [모달 3] 시민용 - 동의 현황 및 명단 확인 모달 -->
 <div id="statusModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -311,7 +309,7 @@
                     </tr>
                 </thead>
                 <tbody id="memberTableBody">
-                    <!-- JavaScript에서 데이터 및 하단 공백 행이 동적으로 채워짐 -->
+                    <!-- 데이터 동적으로 채워짐 -->
                 </tbody>
             </table>
         </div>
@@ -321,7 +319,8 @@
 </div>
 
 <script>
-    const API_BASE_URL = "https://your-serverless-api.workers.dev";
+    // 🔗 방금 구축한 Cloudflare Workers 백엔드 서버 주소 연동
+    const API_BASE_URL = "https://aged-term-35b6.kimhy9255.workers.dev";[span_1](start_span)[span_1](end_span)
     const shareMessage = "[국민의 약속] 일하는 국회, 특권 폐지를 위한 주권자 서명 운동에 동참해 주세요!\nhttps://satosi119.github.io";
 
     let memberDataList = [
@@ -329,6 +328,10 @@
         { name: "김철수 의원", region: "경기 성남시분당구", status: "인증 완료" },
         { name: "이영희 의원", region: "부산 해운대구갑", status: "미동의 (대기 중)" }
     ];
+
+    let currentEmail = "";
+    let currentMemberName = "";
+    let currentRegion = "";
 
     function openModal(modalId) {
         document.getElementById(modalId).style.display = "flex";
@@ -372,7 +375,7 @@
         });
     }
 
-    // 의원용 OTP 관련 함수
+    // [1단계] 의원용 OTP 메일 발송 요청 (백엔드 연동)
     async function submitMemberConsent() {
         const name = document.getElementById('memberName').value.trim();
         const email = document.getElementById('memberEmail').value.trim();
@@ -383,24 +386,83 @@
             return;
         }
 
-        alert(`[안내] ${name} 의원님(${email})께 인증 메일 및 OTP가 발송되었습니다.`);
-        memberDataList.push({ name: `${name} 의원`, region: region || "지역구 미지정", status: "미동의 (대기 중)" });
-        document.getElementById('memberStep1').style.display = 'none';
-        document.getElementById('memberStep2').style.display = 'block';
+        currentEmail = email;
+        currentMemberName = name;
+        currentRegion = region || "지역구 미지정";
+
+        try {
+            const response = await fetch(API_BASE_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "send_otp",
+                    email: email,
+                    memberName: name
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok && data.success) {
+                alert(`[안내] ${name} 의원님(${email})께 인증 메일 및 OTP가 발송되었습니다.`);
+                document.getElementById('memberStep1').style.display = 'none';
+                document.getElementById('memberStep2').style.display = 'block';
+            } else {
+                alert("이메일 발송 실패: " + (data.error || "알 수 없는 오류"));
+            }
+        } catch (err) {
+            alert("서버 통신 중 오류가 발생했습니다: " + err.message);
+        }
     }
 
+    // [2단계] OTP 검증 및 완료 처리 (백엔드 연동)
     async function verifyMemberOTP() {
         const code = document.getElementById('memberOtpInput').value.trim();
         if(!code) {
             alert("OTP 번호를 입력해 주세요.");
             return;
         }
-        alert("🎉 OTP 인증이 성공적으로 완료되었습니다!");
-        closeModal('memberModal');
-        openModal('statusModal');
+
+        try {
+            const response = await fetch(API_BASE_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "verify_otp",
+                    email: currentEmail,
+                    otp: code
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok && data.success) {
+                alert("🎉 OTP 인증이 성공적으로 완료되었습니다!");
+                
+                // 명단에 인증 완료 상태로 추가
+                memberDataList.unshift({ 
+                    name: `${currentMemberName} 의원`, 
+                    region: currentRegion, 
+                    status: "인증 완료" 
+                });
+
+                closeModal('memberModal');
+                openModal('statusModal');
+
+                // 입력 폼 초기화
+                document.getElementById('memberStep1').style.display = 'block';
+                document.getElementById('memberStep2').style.display = 'none';
+                document.getElementById('memberName').value = '';
+                document.getElementById('memberEmail').value = '';
+                document.getElementById('memberRegion').value = '';
+                document.getElementById('memberOtpInput').value = '';
+            } else {
+                alert("인증 실패: " + (data.error || "인증 번호가 일치하지 않습니다."));
+            }
+        } catch (err) {
+            alert("서버 통신 중 오류가 발생했습니다: " + err.message);
+        }
     }
 
-    async function loadMemberStatus() {
+    function loadMemberStatus() {
         renderMemberList();
     }
 
@@ -409,7 +471,6 @@
         const tbody = document.getElementById('memberTableBody');
         tbody.innerHTML = '';
 
-        // 실제 등록된 의원 명단 출력
         memberDataList.forEach(member => {
             const tr = document.createElement('tr');
             const isSuccess = member.status.includes("완료");
@@ -424,7 +485,7 @@
             tbody.appendChild(tr);
         });
 
-        // 💡 하단에 여유 공간(공백란) 3개 강제 추가
+        // 하단 여유 공간(공백란) 3개 강제 추가
         for (let i = 0; i < 3; i++) {
             const emptyTr = document.createElement('tr');
             emptyTr.innerHTML = `
