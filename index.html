@@ -34,7 +34,6 @@
             margin-top: 20px;
         }
 
-        /* 헤더 박스 */
         .header-box {
             background-color: var(--card-bg);
             border-radius: 16px;
@@ -56,7 +55,6 @@
             line-height: 1.4;
         }
 
-        /* 버튼 카드 공통 스타일 */
         .btn-card {
             border-radius: 16px;
             padding: 20px 16px;
@@ -90,7 +88,6 @@
         .btn-teal { background-color: var(--main-teal); }
         .btn-yellow { background-color: var(--main-yellow); color: #222; }
 
-        /* 하단 카드 */
         .footer-card {
             background-color: var(--card-bg);
             border-radius: 16px;
@@ -102,7 +99,6 @@
             border: 1px solid #2e3440;
         }
 
-        /* 모달 레이어 공통 */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -148,7 +144,6 @@
             cursor: pointer;
         }
 
-        /* 폼 요소 및 전파 버튼들 */
         .form-group { margin-bottom: 14px; }
         .form-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 6px; }
         .form-group input {
@@ -168,7 +163,6 @@
         .btn-copy { background-color: #4c566a; color: #fff; }
         .btn-close-modal { background-color: #3b4252; color: #fff; margin-top: 5px; }
 
-        /* 스크롤 가능한 명단 테이블 영역 */
         .table-scroll-container {
             max-height: 260px;
             overflow-y: auto;
@@ -203,37 +197,32 @@
 <body>
 
 <div class="container">
-    <!-- 헤더 섹션 -->
     <div class="header-box">
         <h1>국민의 약속</h1>
         <p>일하는 국회, 특권 폐지를 위한 주권자 서명 운동</p>
     </div>
 
-    <!-- 1. 시민용 서명 & 전파하기 -->
     <div class="btn-card btn-pink" onclick="openModal('shareModal')">
         <h2>🚀 시민용 서명 & 전파하기</h2>
         <span class="sub-text">카카오톡·텔레그램·문자로 웹앱 자동 전파</span>
     </div>
 
-    <!-- 2. 국회의원 동의 인증하기 (의원용) -->
     <div class="btn-card btn-teal" onclick="openModal('memberModal')">
         <h2>🏛️ 국회의원 동의 인증하기</h2>
         <span class="sub-text">공식 이메일 및 OTP 인증</span>
     </div>
 
-    <!-- 3. 동의 의원 & 서명 명단 확인 (시민 공개용) -->
     <div class="btn-card btn-yellow" onclick="openModal('statusModal')">
         <h2>📊 동의 의원 & 서명 명단 확인</h2>
         <span class="sub-text">실시간 동의 현황 및 지역구 검색</span>
     </div>
 
-    <!-- 하단 메시지 -->
     <div class="footer-card">
         특권은 내려놓고, 주권자의 명령에 동합니다!
     </div>
 </div>
 
-<!-- [모달 1] 시민용 - 전국 동시 전파하기 모달 -->
+<!-- 모달 1: 시민용 -->
 <div id="shareModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -252,7 +241,7 @@
     </div>
 </div>
 
-<!-- [모달 2] 의원용 - 국회의원 동의 인증 신청 모달 -->
+<!-- 모달 2: 의원용 -->
 <div id="memberModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -263,15 +252,15 @@
         <div id="memberStep1">
             <div class="form-group">
                 <label>의원 성명</label>
-                <input type="text" id="memberName" placeholder="예: 홍길동">
+                <input type="text" id="memberName" placeholder="예: 김화연">
             </div>
             <div class="form-group">
                 <label>공식 이메일 주소</label>
-                <input type="email" id="memberEmail" placeholder="member@assembly.go.kr">
+                <input type="email" id="memberEmail" placeholder="kimhy9255@gmail.com">
             </div>
             <div class="form-group">
                 <label>소속 지역구</label>
-                <input type="text" id="memberRegion" placeholder="예: 서울 영등포구갑">
+                <input type="text" id="memberRegion" placeholder="예: Gyeongsangbuk-do">
             </div>
             <button class="action-btn" style="background-color:#5e81ac; color:#fff;" onclick="submitMemberConsent()">인증 메일/OTP 발송하기</button>
         </div>
@@ -287,7 +276,7 @@
     </div>
 </div>
 
-<!-- [모달 3] 시민용 - 동의 현황 및 명단 확인 모달 -->
+<!-- 모달 3: 현황 확인 -->
 <div id="statusModal" class="modal-overlay">
     <div class="modal-content">
         <div class="modal-header">
@@ -298,7 +287,6 @@
             <input type="text" id="searchInput" onkeyup="filterMembers()" placeholder="🔍 지역구 또는 의원명을 입력하세요">
         </div>
         
-        <!-- 스크롤 가능한 테이블 컨테이너 -->
         <div class="table-scroll-container">
             <table class="member-table">
                 <thead>
@@ -309,7 +297,6 @@
                     </tr>
                 </thead>
                 <tbody id="memberTableBody">
-                    <!-- 데이터 동적으로 채워짐 -->
                 </tbody>
             </table>
         </div>
@@ -319,8 +306,7 @@
 </div>
 
 <script>
-    // 🔗 방금 구축한 Cloudflare Workers 백엔드 서버 주소 연동
-    const API_BASE_URL = "https://aged-term-35b6.kimhy9255.workers.dev";[span_1](start_span)[span_1](end_span)
+    const API_BASE_URL = "https://aged-term-35b6.kimhy9255.workers.dev";
     const shareMessage = "[국민의 약속] 일하는 국회, 특권 폐지를 위한 주권자 서명 운동에 동참해 주세요!\nhttps://satosi119.github.io";
 
     let memberDataList = [
@@ -344,7 +330,6 @@
         document.getElementById(modalId).style.display = "none";
     }
 
-    // 시민용 전파 기능
     function shareKakao() {
         if (navigator.share) {
             navigator.share({
@@ -375,7 +360,6 @@
         });
     }
 
-    // [1단계] 의원용 OTP 메일 발송 요청 (백엔드 연동)
     async function submitMemberConsent() {
         const name = document.getElementById('memberName').value.trim();
         const email = document.getElementById('memberEmail').value.trim();
@@ -403,18 +387,17 @@
 
             const data = await response.json();
             if (response.ok && data.success) {
-                alert(`[안내] ${name} 의원님(${email})께 인증 메일 및 OTP가 발송되었습니다.`);
+                alert(`[안내] ${name} 의원님(${email})께 인증 메일 및 OTP가 발송되었습니다.\n(지메일 및 네이버의 '스팸함'도 꼭 확인해 주세요!)`);
                 document.getElementById('memberStep1').style.display = 'none';
                 document.getElementById('memberStep2').style.display = 'block';
             } else {
-                alert("이메일 발송 실패: " + (data.error || "알 수 없는 오류"));
+                alert("이메일 발송 실패: " + (data.details || data.error || "알 수 없는 오류"));
             }
         } catch (err) {
             alert("서버 통신 중 오류가 발생했습니다: " + err.message);
         }
     }
 
-    // [2단계] OTP 검증 및 완료 처리 (백엔드 연동)
     async function verifyMemberOTP() {
         const code = document.getElementById('memberOtpInput').value.trim();
         if(!code) {
@@ -437,7 +420,6 @@
             if (response.ok && data.success) {
                 alert("🎉 OTP 인증이 성공적으로 완료되었습니다!");
                 
-                // 명단에 인증 완료 상태로 추가
                 memberDataList.unshift({ 
                     name: `${currentMemberName} 의원`, 
                     region: currentRegion, 
@@ -447,7 +429,6 @@
                 closeModal('memberModal');
                 openModal('statusModal');
 
-                // 입력 폼 초기화
                 document.getElementById('memberStep1').style.display = 'block';
                 document.getElementById('memberStep2').style.display = 'none';
                 document.getElementById('memberName').value = '';
@@ -466,7 +447,6 @@
         renderMemberList();
     }
 
-    // 명단 렌더링 (하단 공백 3행 추가 및 스크롤 지원)
     function renderMemberList() {
         const tbody = document.getElementById('memberTableBody');
         tbody.innerHTML = '';
@@ -485,7 +465,6 @@
             tbody.appendChild(tr);
         });
 
-        // 하단 여유 공간(공백란) 3개 강제 추가
         for (let i = 0; i < 3; i++) {
             const emptyTr = document.createElement('tr');
             emptyTr.innerHTML = `
