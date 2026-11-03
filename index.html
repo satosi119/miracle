@@ -318,6 +318,7 @@
     let currentEmail = "";
     let currentMemberName = "";
     let currentRegion = "";
+    let generatedOtpCode = "";
 
     function openModal(modalId) {
         document.getElementById(modalId).style.display = "flex";
@@ -373,6 +374,7 @@
         currentEmail = email;
         currentMemberName = name;
         currentRegion = region || "지역구 미지정";
+        generatedOtpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
         try {
             const response = await fetch(API_BASE_URL, {
@@ -381,17 +383,18 @@
                 body: JSON.stringify({
                     action: "send_otp",
                     email: email,
+                    otp: generatedOtpCode,
                     memberName: name
                 })
             });
 
-            const data = await response.json();
-            if (response.ok && data.success) {
+            if (response.ok) {
                 alert(`[안내] ${name} 의원님(${email})께 인증 메일 및 OTP가 발송되었습니다.\n(지메일 및 네이버의 '스팸함'도 꼭 확인해 주세요!)`);
                 document.getElementById('memberStep1').style.display = 'none';
                 document.getElementById('memberStep2').style.display = 'block';
             } else {
-                alert("이메일 발송 실패: " + (data.details || data.error || "알 수 없는 오류"));
+                const errText = await response.text();
+                alert("이메일 발송 실패: " + errText);
             }
         } catch (err) {
             alert("서버 통신 중 오류가 발생했습니다: " + err.message);
@@ -405,41 +408,26 @@
             return;
         }
 
-        try {
-            const response = await fetch(API_BASE_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    action: "verify_otp",
-                    email: currentEmail,
-                    otp: code
-                })
+        if (code === generatedOtpCode) {
+            alert("🎉 OTP 인증이 성공적으로 완료되었습니다!");
+            
+            memberDataList.unshift({ 
+                name: `${currentMemberName} 의원`, 
+                region: currentRegion, 
+                status: "인증 완료" 
             });
 
-            const data = await response.json();
-            if (response.ok && data.success) {
-                alert("🎉 OTP 인증이 성공적으로 완료되었습니다!");
-                
-                memberDataList.unshift({ 
-                    name: `${currentMemberName} 의원`, 
-                    region: currentRegion, 
-                    status: "인증 완료" 
-                });
+            closeModal('memberModal');
+            openModal('statusModal');
 
-                closeModal('memberModal');
-                openModal('statusModal');
-
-                document.getElementById('memberStep1').style.display = 'block';
-                document.getElementById('memberStep2').style.display = 'none';
-                document.getElementById('memberName').value = '';
-                document.getElementById('memberEmail').value = '';
-                document.getElementById('memberRegion').value = '';
-                document.getElementById('memberOtpInput').value = '';
-            } else {
-                alert("인증 실패: " + (data.error || "인증 번호가 일치하지 않습니다."));
-            }
-        } catch (err) {
-            alert("서버 통신 중 오류가 발생했습니다: " + err.message);
+            document.getElementById('memberStep1').style.display = 'block';
+            document.getElementById('memberStep2').style.display = 'none';
+            document.getElementById('memberName').value = '';
+            document.getElementById('memberEmail').value = '';
+            document.getElementById('memberRegion').value = '';
+            document.getElementById('memberOtpInput').value = '';
+        } else {
+            alert("인증 실패: 인증 번호가 일치하지 않습니다.");
         }
     }
 
