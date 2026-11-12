@@ -2,478 +2,429 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>국민의 약속 - 서명 및 동의 운동</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>네온 갤럭시 슈터 - EXTREME</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #121212;
-            --main-pink: #c2185b;
-            --main-teal: #00897b;
-            --main-yellow: #fbc02d;
-            --card-bg: #1e222d;
-            --modal-dark: #1a1e29;
-            --text-light: #ffffff;
+        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #050510; font-family: 'Noto Sans KR', sans-serif; touch-action: none; }
+        #game-canvas { display: block; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+        .font-cyber { font-family: 'Orbitron', 'Noto Sans KR', sans-serif; }
+        .neon-btn { background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); box-shadow: 0 0 20px rgba(0, 242, 254, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.5); transition: transform 0.15s ease; }
+        .neon-btn:active { transform: scale(0.95); }
+        .neon-btn-retry { background: linear-gradient(135deg, #ff0844 0%, #ffb199 100%); box-shadow: 0 0 20px rgba(255, 8, 68, 0.6); }
+        .glass-panel { background: rgba(10, 14, 35, 0.78); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(0, 242, 254, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6); }
+        @keyframes pulseGlow {
+            0%, 100% { text-shadow: 0 0 12px rgba(0, 242, 254, 0.8); }
+            50% { text-shadow: 0 0 20px rgba(0, 242, 254, 1); }
         }
-
-        body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-light);
-            margin: 0;
-            padding: 20px 15px;
-            display: flex;
-            justify-content: center;
+        .title-glow { animation: pulseGlow 2.5s infinite ease-in-out; }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -45px) scale(1.25); }
         }
-
-        .container {
-            width: 100%;
-            max-width: 420px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .header-box {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 24px 16px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            border: 1px solid #2e3440;
-        }
-        .header-box h1 {
-            margin: 0 0 8px 0;
-            font-size: 26px;
-            font-weight: 800;
-            color: #fff;
-        }
-        .header-box p {
-            margin: 0;
-            font-size: 13px;
-            color: #aaa;
-            line-height: 1.4;
-        }
-
-        .btn-card {
-            border-radius: 16px;
-            padding: 20px 16px;
-            color: #fff;
-            text-align: center;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: transform 0.1s ease;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .btn-card:active {
-            transform: scale(0.98);
-        }
-        .btn-card h2 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .btn-card span.sub-text {
-            display: block;
-            margin-top: 6px;
-            font-size: 12px;
-            opacity: 0.8;
-        }
-
-        .btn-pink { background-color: var(--main-pink); }
-        .btn-teal { background-color: var(--main-teal); }
-        .btn-yellow { background-color: var(--main-yellow); color: #222; }
-
-        .footer-card {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 18px 16px;
-            text-align: center;
-            font-weight: 700;
-            font-size: 14px;
-            color: #fff;
-            border: 1px solid #2e3440;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 16px;
-            box-sizing: border-box;
-        }
-        .modal-content {
-            background-color: var(--modal-dark);
-            color: #fff;
-            width: 100%;
-            max-width: 390px;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border: 1px solid #3b4252;
-            box-sizing: border-box;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            border-bottom: 1px solid #2e3440;
-            padding-bottom: 12px;
-        }
-        .modal-header h3 {
-            margin: 0;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .close-btn {
-            background: none;
-            border: none;
-            color: #aaa;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .form-group { margin-bottom: 14px; }
-        .form-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 6px; }
-        .form-group input {
-            width: 100%; padding: 12px; border-radius: 8px;
-            border: 1px solid #3b4252; background-color: #2e3440; color: #fff;
-            box-sizing: border-box; font-size: 14px;
-        }
-        
-        .action-btn {
-            width: 100%; padding: 14px; border-radius: 10px; border: none;
-            font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 10px;
-            text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-        }
-        .btn-kakao { background-color: #ffeb00; color: #3c1e1e; }
-        .btn-telegram { background-color: #229ed9; color: #fff; }
-        .btn-sms { background-color: #00c73c; color: #fff; }
-        .btn-copy { background-color: #4c566a; color: #fff; }
-        .btn-close-modal { background-color: #3b4252; color: #fff; margin-top: 5px; }
-
-        .table-scroll-container {
-            max-height: 260px;
-            overflow-y: auto;
-            margin-top: 10px;
-            border: 1px solid #2e3440;
-            border-radius: 8px;
-        }
-        .member-table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            font-size: 13px; 
-        }
-        .member-table th {
-            position: sticky;
-            top: 0;
-            background-color: #1a1e29;
-            z-index: 10;
-            padding: 10px 6px;
-            border-bottom: 1px solid #3b4252;
-            color: #88c0d0;
-        }
-        .member-table td { 
-            padding: 12px 6px; 
-            text-align: center; 
-            border-bottom: 1px solid #2e3440; 
-        }
-        .badge-success { color: #a3be8c; font-weight: bold; }
-        .badge-pending { color: #d08770; }
-        .badge-empty { color: #555; }
+        .bonus-popup { position: absolute; pointer-events: none; font-weight: 900; text-shadow: 0 0 10px rgba(0, 0, 0, 0.9); animation: floatUp 0.75s ease-out forwards; z-index: 15; white-space: nowrap; }
+        @keyframes damageFlash { 0% { opacity: 0.45; } 100% { opacity: 0; } }
+        .damage-overlay { animation: damageFlash 0.35s ease-out forwards; }
     </style>
 </head>
 <body>
+    <canvas id="game-canvas"></canvas>
+    <div id="damage-flash" class="fixed inset-0 bg-rose-600 pointer-events-none opacity-0 z-10"></div>
 
-<div class="container">
-    <div class="header-box">
-        <h1>국민의 약속</h1>
-        <p>일하는 국회, 특권 폐지를 위한 주권자 서명 운동</p>
-    </div>
-
-    <div class="btn-card btn-pink" onclick="openModal('shareModal')">
-        <h2>🚀 시민용 서명 & 전파하기</h2>
-        <span class="sub-text">카카오톡·텔레그램·문자로 웹앱 자동 전파</span>
-    </div>
-
-    <div class="btn-card btn-teal" onclick="openModal('memberModal')">
-        <h2>🏛️ 국회의원 동의 인증하기</h2>
-        <span class="sub-text">공식 이메일 및 OTP 인증</span>
-    </div>
-
-    <div class="btn-card btn-yellow" onclick="openModal('statusModal')">
-        <h2>📊 동의 의원 & 서명 명단 확인</h2>
-        <span class="sub-text">실시간 동의 현황 및 지역구 검색</span>
-    </div>
-
-    <div class="footer-card">
-        특권은 내려놓고, 주권자의 명령에 동합니다!
-    </div>
-</div>
-
-<!-- 모달 1: 시민용 -->
-<div id="shareModal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>🚀 국민의 약속 - 전국 동시 전파하기</h3>
-            <button class="close-btn" onclick="closeModal('shareModal')">&times;</button>
-        </div>
-        <p style="font-size:12px; color:#ccc; margin-bottom:15px; line-height:1.4;">
-            버튼 하나만 클릭하면 국민의 약속 영구 웹앱 주소와 메시지가 원터치로 자동 발송됩니다!
-        </p>
-        
-        <button class="action-btn btn-kakao" onclick="shareKakao()">💬 카카오톡 / 메신저로 즉시 전파하기</button>
-        <button class="action-btn btn-telegram" onclick="shareTelegram()">✈️ 텔레그램 방에 전파하기</button>
-        <button class="action-btn btn-sms" onclick="shareSMS()">📱 등록된 스마트폰 문자로 자동 발송하기</button>
-        <button class="action-btn btn-copy" onclick="copyLink()">📋 웹앱 사이트 주소(링크) 복사하기</button>
-        <button class="action-btn btn-close-modal" onclick="closeModal('shareModal')">닫기</button>
-    </div>
-</div>
-
-<!-- 모달 2: 의원용 -->
-<div id="memberModal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>🏛️ 국회의원 공식 동의 신청</h3>
-            <button class="close-btn" onclick="closeModal('memberModal')">&times;</button>
-        </div>
-
-        <div id="memberStep1">
-            <div class="form-group">
-                <label>의원 성명</label>
-                <input type="text" id="memberName" placeholder="예: 김화연">
+    <div id="hud" class="fixed top-0 left-0 w-full p-3.5 sm:p-4 flex justify-between items-start z-10 pointer-events-none">
+        <div class="flex flex-col gap-1.5">
+            <div class="glass-panel px-3.5 py-2 rounded-2xl">
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <div class="text-[10px] text-cyan-300 font-bold tracking-wider uppercase">SCORE</div>
+                        <div id="score-display" class="font-cyber text-2xl sm:text-3xl font-black text-white tracking-wider">0</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] text-amber-300 font-bold">BEST</div>
+                        <div id="highscore-display" class="font-cyber text-xs sm:text-sm font-bold text-amber-200">0</div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label>공식 이메일 주소</label>
-                <input type="email" id="memberEmail" placeholder="kimhy9255@gmail.com">
+            <div class="flex flex-wrap gap-1.5 items-center">
+                <div class="glass-panel px-3 py-1.5 rounded-xl flex items-center gap-2">
+                    <span class="text-[10px] text-emerald-300 font-bold">SHIELD</span>
+                    <div class="w-20 sm:w-24 h-2.5 bg-slate-800 rounded-full overflow-hidden border border-slate-600">
+                        <div id="shield-bar" class="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all duration-200" style="width: 100%;"></div>
+                    </div>
+                </div>
+                <div class="glass-panel px-2.5 py-1.5 rounded-xl">
+                    <span class="text-[10px] text-amber-300 font-bold">WEAPON: </span>
+                    <span id="weapon-display" class="font-cyber text-xs font-bold text-amber-200">TWIN (2연발)</span>
+                </div>
+                <div class="glass-panel px-2.5 py-1.5 rounded-xl">
+                    <span class="text-[10px] text-rose-300 font-bold">KILLS: </span>
+                    <span id="kills-display" class="font-cyber text-xs font-bold text-rose-200">0</span>
+                </div>
             </div>
-            <div class="form-group">
-                <label>소속 지역구</label>
-                <input type="text" id="memberRegion" placeholder="예: Gyeongsangbuk-do">
-            </div>
-            <button class="action-btn" style="background-color:#5e81ac; color:#fff;" onclick="submitMemberConsent()">인증 메일/OTP 발송하기</button>
         </div>
+        <button id="sound-toggle-btn" class="pointer-events-auto glass-panel p-3 rounded-2xl text-cyan-300 hover:text-white active:scale-90 transition">
+            🔊
+        </button>
+    </div>
 
-        <div id="memberStep2" style="display:none; margin-top:10px;">
-            <p style="font-size:13px; color:#a3be8c;">입력하신 이메일로 OTP 인증번호가 발송되었습니다.</p>
-            <div class="form-group">
-                <label>수신받은 OTP 6자리 입력</label>
-                <input type="text" id="memberOtpInput" placeholder="예: 482910">
+    <div id="start-screen" class="fixed inset-0 flex items-center justify-center p-5 z-20 bg-black/55 backdrop-blur-sm">
+        <div class="glass-panel w-full max-w-sm rounded-3xl p-7 text-center flex flex-col items-center">
+            <div class="inline-block px-3 py-1 rounded-full bg-cyan-500/20 border border-cyan-400/40 text-cyan-300 text-xs font-bold mb-3 tracking-widest">
+                HARDCORE EXTREME
             </div>
-            <button class="action-btn" style="background:#a3be8c; color:#1a1e29;" onclick="verifyMemberOTP()">OTP 검증 및 동의 완료</button>
+            <h1 class="font-cyber text-3xl sm:text-4xl font-black text-white title-glow mb-2">
+                NEON GALAXY<br><span class="text-cyan-400">SHOOTER</span>
+            </h1>
+            <p class="text-slate-300 text-sm mb-6 leading-relaxed">
+                10만/20만 점 돌파 시 극악의 하드코어 난이도 및 지옥 모드 개방!
+            </p>
+            <button id="start-btn" class="neon-btn w-full py-4 rounded-2xl text-slate-950 font-black text-lg tracking-wider cursor-pointer">
+                출격하기 (LAUNCH)
+            </button>
         </div>
     </div>
-</div>
 
-<!-- 모달 3: 현황 확인 -->
-<div id="statusModal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>🏛️ 국회의원 동의 현황 및 명단</h3>
-            <button class="close-btn" onclick="closeModal('statusModal')">&times;</button>
+    <div id="gameover-screen" class="fixed inset-0 hidden items-center justify-center p-5 z-20 bg-black/65 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-sm rounded-3xl p-7 text-center flex flex-col items-center border-rose-500/40">
+            <div class="text-rose-400 font-cyber text-sm font-bold tracking-widest mb-1">FIGHTER DESTROYED</div>
+            <h2 class="font-cyber text-3xl font-black text-white mb-5">GAME OVER</h2>
+            <div class="w-full grid grid-cols-3 gap-2.5 mb-6">
+                <div class="bg-slate-900/85 border border-slate-700/70 rounded-2xl p-3">
+                    <div class="text-[11px] text-slate-400 mb-1">최종 점수</div>
+                    <div id="final-score" class="font-cyber text-lg font-black text-cyan-300">0</div>
+                </div>
+                <div class="bg-slate-900/85 border border-rose-500/30 rounded-2xl p-3">
+                    <div class="text-[11px] text-rose-300 mb-1">격추 수</div>
+                    <div id="final-kills" class="font-cyber text-lg font-black text-rose-300">0</div>
+                </div>
+                <div class="bg-slate-900/85 border border-amber-500/30 rounded-2xl p-3">
+                    <div class="text-[11px] text-amber-300 mb-1">최고 기록</div>
+                    <div id="final-highscore" class="font-cyber text-lg font-black text-amber-300">0</div>
+                </div>
+            </div>
+            <button id="retry-btn" class="neon-btn neon-btn-retry w-full py-4 rounded-2xl text-white font-black text-lg tracking-wider cursor-pointer">
+                재출격 (RETRY)
+            </button>
         </div>
-        <div class="form-group" style="margin-bottom: 8px;">
-            <input type="text" id="searchInput" onkeyup="filterMembers()" placeholder="🔍 지역구 또는 의원명을 입력하세요">
-        </div>
-        
-        <div class="table-scroll-container">
-            <table class="member-table">
-                <thead>
-                    <tr>
-                        <th>의원명</th>
-                        <th>지역구</th>
-                        <th>동의 상태</th>
-                    </tr>
-                </thead>
-                <tbody id="memberTableBody">
-                </tbody>
-            </table>
-        </div>
-
-        <button class="action-btn btn-close-modal" style="margin-top:15px;" onclick="closeModal('statusModal')">닫기</button>
     </div>
-</div>
 
-<script>
-    const API_BASE_URL = "https://aged-term-35b6.kimhy9255.workers.dev";
-    const shareMessage = "[국민의 약속] 일하는 국회, 특권 폐지를 위한 주권자 서명 운동에 동참해 주세요!\nhttps://satosi119.github.io";
+    <div id="popup-container" class="fixed inset-0 pointer-events-none z-15"></div>
 
-    let memberDataList = [
-        { name: "홍길동 의원", region: "서울 영등포구갑", status: "인증 완료" },
-        { name: "김철수 의원", region: "경기 성남시분당구", status: "인증 완료" },
-        { name: "이영희 의원", region: "부산 해운대구갑", status: "미동의 (대기 중)" }
-    ];
+    <script>
+        let scene, camera, renderer, playerShip, gridHelper1, gridHelper2, starField;
+        let playerBullets = [], enemyBullets = [], enemyFighters = [], crystals = [], particles = [];
+        let gameState = 'START', score = 0, highScore = 0, kills = 0, shield = 100, weaponLevel = 1;
+        const MAX_SHIELD = 100;
+        let targetX = 0, currentX = 0, targetZ = 2.8, currentZ = 2.8, TRACK_HALF_WIDTH = 6.2;
+        let isDragging = false, previousTouchX = 0, previousTouchY = 0;
+        let keys = { left: false, right: false, up: false, down: false };
+        let lastTime = 0, fireTimer = 0, waveTimer = 0, crystalTimer = 0;
 
-    let currentEmail = "";
-    let currentMemberName = "";
-    let currentRegion = "";
-    let generatedOtpCode = "";
+        const canvas = document.getElementById('game-canvas');
+        const scoreEl = document.getElementById('score-display');
+        const highScoreEl = document.getElementById('highscore-display');
+        const shieldBarEl = document.getElementById('shield-bar');
+        const weaponEl = document.getElementById('weapon-display');
+        const killsEl = document.getElementById('kills-display');
+        const damageFlashEl = document.getElementById('damage-flash');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('gameover-screen');
+        const finalScoreEl = document.getElementById('final-score');
+        const finalKillsEl = document.getElementById('final-kills');
+        const finalHighScoreEl = document.getElementById('final-highscore');
+        const popupContainer = document.getElementById('popup-container');
 
-    function openModal(modalId) {
-        document.getElementById(modalId).style.display = "flex";
-        if (modalId === 'statusModal') {
-            loadMemberStatus();
+        function loadHighScore() {
+            try { highScore = parseInt(localStorage.getItem('neon_shooter_hs') || '0', 10); } catch (e) { highScore = 0; }
+            highScoreEl.textContent = highScore.toLocaleString();
         }
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = "none";
-    }
-
-    function shareKakao() {
-        if (navigator.share) {
-            navigator.share({
-                title: '국민의 약속',
-                text: shareMessage,
-                url: window.location.href,
-            }).catch(() => {});
-        } else {
-            window.open(`https://sharer.kakao.com/picker/link?url=${encodeURIComponent(window.location.href)}`, '_blank');
-        }
-    }
-
-    function shareTelegram() {
-        const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(shareMessage)}`;
-        window.open(tgUrl, '_blank');
-    }
-
-    function shareSMS() {
-        const smsUrl = `sms:?body=${encodeURIComponent(shareMessage)}`;
-        window.location.href = smsUrl;
-    }
-
-    function copyLink() {
-        navigator.clipboard.writeText("https://satosi119.github.io").then(() => {
-            alert("📋 웹앱 사이트 주소가 클립보드에 복사되었습니다!");
-        }).catch(() => {
-            alert("주소 복사에 실패했습니다.");
-        });
-    }
-
-    async function submitMemberConsent() {
-        const name = document.getElementById('memberName').value.trim();
-        const email = document.getElementById('memberEmail').value.trim();
-        const region = document.getElementById('memberRegion').value.trim();
-
-        if(!name || !email) {
-            alert("의원 성명과 이메일을 정확히 입력해 주세요.");
-            return;
-        }
-
-        currentEmail = email;
-        currentMemberName = name;
-        currentRegion = region || "지역구 미지정";
-        generatedOtpCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-        try {
-            const response = await fetch(API_BASE_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    action: "send_otp",
-                    email: email,
-                    otp: generatedOtpCode,
-                    memberName: name
-                })
-            });
-
-            if (response.ok) {
-                alert(`[안내] ${name} 의원님(${email})께 인증 메일 및 OTP가 발송되었습니다.\n(지메일 및 네이버의 '스팸함'도 꼭 확인해 주세요!)`);
-                document.getElementById('memberStep1').style.display = 'none';
-                document.getElementById('memberStep2').style.display = 'block';
-            } else {
-                const errText = await response.text();
-                alert("이메일 발송 실패: " + errText);
+        function saveHighScore(s) {
+            if (s > highScore) {
+                highScore = s;
+                try { localStorage.setItem('neon_shooter_hs', highScore.toString()); } catch (e) {}
+                highScoreEl.textContent = highScore.toLocaleString();
             }
-        } catch (err) {
-            alert("서버 통신 중 오류가 발생했습니다: " + err.message);
-        }
-    }
-
-    async function verifyMemberOTP() {
-        const code = document.getElementById('memberOtpInput').value.trim();
-        if(!code) {
-            alert("OTP 번호를 입력해 주세요.");
-            return;
         }
 
-        if (code === generatedOtpCode) {
-            alert("🎉 OTP 인증이 성공적으로 완료되었습니다!");
+        function updateHUD() {
+            scoreEl.textContent = Math.floor(score).toLocaleString();
+            killsEl.textContent = kills.toLocaleString();
+            weaponEl.textContent = weaponLevel === 1 ? 'TWIN (2연발)' : (weaponLevel === 2 ? 'TRIPLE (3연발)' : 'QUAD (4연발)');
+            shieldBarEl.style.width = `${Math.max(0, (shield / MAX_SHIELD) * 100)}%`;
+        }
+
+        function initThree() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x040510);
+            scene.fog = new THREE.FogExp2(0x040510, 0.014);
+
+            const aspect = window.innerWidth / window.innerHeight;
+            camera = new THREE.PerspectiveCamera(aspect < 1 ? 72 : 58, aspect, 0.1, 160);
+            camera.position.set(0, 5.2, 9.6);
+            camera.lookAt(0, 0.5, -12);
+
+            renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+            const dirLight = new THREE.DirectionalLight(0x38bdf8, 1.3);
+            dirLight.position.set(6, 14, 8);
+            scene.add(dirLight);
+
+            // 환경 그리드
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(16, 200), new THREE.MeshBasicMaterial({ color: 0x060818 }));
+            floor.rotation.x = -Math.PI / 2; floor.position.z = -70; scene.add(floor);
+
+            gridHelper1 = new THREE.GridHelper(16, 16, 0x00f2fe, 0x172047);
+            gridHelper1.position.set(0, 0.01, -40); gridHelper1.scale.z = 5; scene.add(gridHelper1);
+            gridHelper2 = new THREE.GridHelper(16, 16, 0x00f2fe, 0x172047);
+            gridHelper2.position.set(0, 0.01, -120); gridHelper2.scale.z = 5; scene.add(gridHelper2);
+
+            // 플레이어
+            playerShip = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.ConeGeometry(0.6, 2.4, 6), new THREE.MeshPhongMaterial({ color: 0xf1f5f9, emissive: 0x0284c7, emissiveIntensity: 0.35 }));
+            body.rotateX(-Math.PI / 2); playerShip.add(body);
+            const wings = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.08, 0.85), new THREE.MeshPhongMaterial({ color: 0x1e293b, emissive: 0x3b82f6 }));
+            wings.position.set(0, -0.02, 0.35); playerShip.add(wings);
             
-            memberDataList.unshift({ 
-                name: `${currentMemberName} 의원`, 
-                region: currentRegion, 
-                status: "인증 완료" 
+            const gunGeo = new THREE.CylinderGeometry(0.09, 0.09, 1.2, 8); gunGeo.rotateX(Math.PI / 2);
+            const gunMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe });
+            const lGun = new THREE.Mesh(gunGeo, gunMat); lGun.position.set(-1.1, 0.05, -0.1); playerShip.add(lGun);
+            const rGun = new THREE.Mesh(gunGeo, gunMat); rGun.position.set(1.1, 0.05, -0.1); playerShip.add(rGun);
+
+            playerShip.position.set(0, 0.8, 2.8);
+            scene.add(playerShip);
+
+            setupControls();
+        }
+
+        function createEnemy(type) {
+            const group = new THREE.Group();
+            const isHeavy = type === 'HEAVY';
+            const isStriker = type === 'STRIKER';
+            const neonColor = isHeavy ? 0xd946ef : (isStriker ? 0xf97316 : 0xff0844);
+
+            const nose = new THREE.Mesh(new THREE.ConeGeometry(0.58, 2.2, 5), new THREE.MeshPhongMaterial({ color: isHeavy ? 0x3b0764 : 0x1f2937, emissive: neonColor, emissiveIntensity: 0.5 }));
+            nose.rotateX(Math.PI / 2); group.add(nose);
+            const wing = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.08, 0.75), new THREE.MeshPhongMaterial({ color: 0x0f172a, emissive: neonColor }));
+            wing.position.set(0, 0, -0.2); group.add(wing);
+
+            group.scale.setScalar(isHeavy ? 1.45 : (isStriker ? 1.08 : 0.98));
+            return group;
+        }
+
+        function spawnWave() {
+            const isHardcore = score >= 100000;
+            const isExtreme = score >= 200000;
+            const spawnZ = -95;
+            
+            const count = isExtreme ? (Math.random() < 0.6 ? 3 : 2) : (isHardcore ? 2 : 1);
+            for (let i = 0; i < count; i++) {
+                const type = isExtreme ? (Math.random() < 0.4 ? 'HEAVY' : 'STRIKER') : (score > 50000 && Math.random() < 0.3 ? 'HEAVY' : 'SCOUT');
+                const mesh = createEnemy(type);
+                const laneX = (Math.random() * 2 - 1) * (TRACK_HALF_WIDTH - 0.8);
+                mesh.position.set(laneX, 0.85, spawnZ - i * 6);
+                scene.add(mesh);
+
+                enemyFighters.push({
+                    mesh, type,
+                    hp: type === 'HEAVY' ? 4 : 1,
+                    speed: (type === 'HEAVY' ? 0.45 : 0.7) * (isExtreme ? 1.55 : (isHardcore ? 1.3 : 1.0)),
+                    baseX: laneX, phase: Math.random() * Math.PI,
+                    shootCooldown: 40 + Math.random() * 30,
+                    scoreValue: type === 'HEAVY' ? 300 : 100,
+                    hitRadius: type === 'HEAVY' ? 1.45 : 1.15
+                });
+            }
+        }
+
+        function firePlayer() {
+            const pos = playerShip.position;
+            const bGeo = new THREE.BoxGeometry(0.16, 0.16, 1.45);
+            const bMat = new THREE.MeshBasicMaterial({ color: 0x00f2fe });
+
+            const addB = (ox, vx) => {
+                const b = new THREE.Mesh(bGeo, bMat);
+                b.position.set(pos.x + ox, pos.y + 0.05, pos.z - 0.9);
+                b.userData = { vx, vz: -1.9 };
+                scene.add(b);
+                playerBullets.push(b);
+            };
+
+            if (weaponLevel === 1) { addB(-1.05, 0); addB(1.05, 0); }
+            else if (weaponLevel === 2) { addB(-1.05, 0); addB(1.05, 0); addB(0, 0); }
+            else { addB(-0.95, 0); addB(0.95, 0); addB(-1.25, -0.08); addB(1.25, 0.08); }
+        }
+
+        function fireEnemy(pos) {
+            const eb = new THREE.Mesh(new THREE.SphereGeometry(0.24, 8, 8), new THREE.MeshBasicMaterial({ color: 0xff2a6d }));
+            eb.position.set(pos.x, pos.y, pos.z + 1.1);
+            const speed = score >= 200000 ? 1.2 : 0.85;
+            eb.userData = { vx: 0, vz: speed };
+            scene.add(eb);
+            enemyBullets.push(eb);
+        }
+
+        function spawnCrystal() {
+            const cry = new THREE.Mesh(new THREE.OctahedronGeometry(0.65, 0), new THREE.MeshPhongMaterial({ color: 0xfacc15, emissive: 0xf59e0b }));
+            cry.position.set((Math.random() * 2 - 1) * (TRACK_HALF_WIDTH - 0.8), 0.9, -95);
+            scene.add(cry);
+            crystals.push(cry);
+        }
+
+        function setupControls() {
+            window.addEventListener('touchstart', e => { if (gameState === 'PLAYING' && e.touches.length) { isDragging = true; previousTouchX = e.touches[0].clientX; previousTouchY = e.touches[0].clientY; } }, {passive:true});
+            window.addEventListener('touchmove', e => {
+                if (!isDragging || gameState !== 'PLAYING') return;
+                const dx = e.touches[0].clientX - previousTouchX;
+                const dy = e.touches[0].clientY - previousTouchY;
+                previousTouchX = e.touches[0].clientX; previousTouchY = e.touches[0].clientY;
+                targetX = THREE.MathUtils.clamp(targetX + dx * 0.02, -TRACK_HALF_WIDTH, TRACK_HALF_WIDTH);
+                targetZ = THREE.MathUtils.clamp(targetZ + dy * 0.02, -1.5, 4.5);
+            }, {passive:true});
+            window.addEventListener('touchend', () => isDragging = false);
+            window.addEventListener('keydown', e => {
+                if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = true;
+                if (e.key === 'ArrowRight' || e.key === 'd') keys.right = true;
             });
-
-            closeModal('memberModal');
-            openModal('statusModal');
-
-            document.getElementById('memberStep1').style.display = 'block';
-            document.getElementById('memberStep2').style.display = 'none';
-            document.getElementById('memberName').value = '';
-            document.getElementById('memberEmail').value = '';
-            document.getElementById('memberRegion').value = '';
-            document.getElementById('memberOtpInput').value = '';
-        } else {
-            alert("인증 실패: 인증 번호가 일치하지 않습니다.");
+            window.addEventListener('keyup', e => {
+                if (e.key === 'ArrowLeft' || e.key === 'a') keys.left = false;
+                if (e.key === 'ArrowRight' || e.key === 'd') keys.right = false;
+            });
         }
-    }
 
-    function loadMemberStatus() {
-        renderMemberList();
-    }
+        function startGame() {
+            playerBullets.forEach(b => scene.remove(b));
+            enemyBullets.forEach(b => scene.remove(b));
+            enemyFighters.forEach(e => scene.remove(e.mesh));
+            crystals.forEach(c => scene.remove(c));
+            playerBullets = []; enemyBullets = []; enemyFighters = []; crystals = [];
 
-    function renderMemberList() {
-        const tbody = document.getElementById('memberTableBody');
-        tbody.innerHTML = '';
+            score = 0; kills = 0; shield = MAX_SHIELD; weaponLevel = 1;
+            targetX = 0; currentX = 0; targetZ = 2.8; currentZ = 2.8;
+            fireTimer = 0; waveTimer = 40; crystalTimer = 0;
 
-        memberDataList.forEach(member => {
-            const tr = document.createElement('tr');
-            const isSuccess = member.status.includes("완료");
-            const statusClass = isSuccess ? "badge-success" : "badge-pending";
-            const icon = isSuccess ? "✔" : "";
-
-            tr.innerHTML = `
-                <td>${member.name}</td>
-                <td>${member.region}</td>
-                <td class="${statusClass}">[ ${member.status} ${icon} ]</td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        for (let i = 0; i < 3; i++) {
-            const emptyTr = document.createElement('tr');
-            emptyTr.innerHTML = `
-                <td class="badge-empty">-</td>
-                <td class="badge-empty">작성 대기 중</td>
-                <td class="badge-empty">미동의 (대기 중)</td>
-            `;
-            tbody.appendChild(emptyTr);
+            playerShip.visible = true;
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('flex');
+            gameState = 'PLAYING';
+            updateHUD();
         }
-    }
 
-    function filterMembers() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        const rows = document.querySelectorAll('#memberTableBody tr');
+        function animate(time) {
+            requestAnimationFrame(animate);
+            const dt = 1;
 
-        rows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(query) ? '' : 'none';
-        });
-    }
-</script>
+            if (gridHelper1) {
+                gridHelper1.position.z += 0.55; gridHelper2.position.z += 0.55;
+                if (gridHelper1.position.z >= 40) gridHelper1.position.z = gridHelper2.position.z - 80;
+                if (gridHelper2.position.z >= 40) gridHelper2.position.z = gridHelper1.position.z - 80;
+            }
 
+            if (gameState === 'PLAYING') {
+                if (keys.left) targetX -= 0.25;
+                if (keys.right) targetX += 0.25;
+                targetX = THREE.MathUtils.clamp(targetX, -TRACK_HALF_WIDTH, TRACK_HALF_WIDTH);
+
+                currentX = THREE.MathUtils.lerp(currentX, targetX, 0.2);
+                currentZ = THREE.MathUtils.lerp(currentZ, targetZ, 0.18);
+                playerShip.position.set(currentX, 0.8, currentZ);
+
+                score += 0.2;
+                updateHUD();
+
+                fireTimer += dt;
+                if (fireTimer >= (score >= 200000 ? 6 : 9)) { fireTimer = 0; firePlayer(); }
+
+                waveTimer += dt;
+                const spawnRate = score >= 200000 ? 25 : (score >= 100000 ? 35 : 60);
+                if (waveTimer >= spawnRate) { waveTimer = 0; spawnWave(); }
+
+                crystalTimer += dt;
+                if (crystalTimer >= 300) { crystalTimer = 0; spawnCrystal(); }
+
+                // 총알 이동
+                for (let i = playerBullets.length - 1; i >= 0; i--) {
+                    const b = playerBullets[i];
+                    b.position.z += b.userData.vz;
+                    if (b.position.z < -100) { scene.remove(b); playerBullets.splice(i, 1); }
+                }
+
+                // 적 이동 및 충돌
+                for (let i = enemyFighters.length - 1; i >= 0; i--) {
+                    const e = enemyFighters[i];
+                    e.mesh.position.z += e.speed;
+
+                    if (e.mesh.position.z > -70 && Math.random() < (score >= 200000 ? 0.08 : 0.03)) {
+                        fireEnemy(e.mesh.position);
+                    }
+
+                    // 플레이어탄 충돌
+                    let dead = false;
+                    for (let j = playerBullets.length - 1; j >= 0; j--) {
+                        const b = playerBullets[j];
+                        if (Math.abs(b.position.x - e.mesh.position.x) < 1.2 && Math.abs(b.position.z - e.mesh.position.z) < 1.2) {
+                            scene.remove(b); playerBullets.splice(j, 1);
+                            e.hp--;
+                            if (e.hp <= 0) {
+                                dead = true; kills++; score += e.scoreValue;
+                                scene.remove(e.mesh); enemyFighters.splice(i, 1);
+                            }
+                            break;
+                        }
+                    }
+                    if (dead) continue;
+
+                    // 플레이어 피격
+                    if (Math.abs(e.mesh.position.x - currentX) < 1.0 && Math.abs(e.mesh.position.z - currentZ) < 1.0) {
+                        scene.remove(e.mesh); enemyFighters.splice(i, 1);
+                        shield -= 35;
+                        if (shield <= 0) {
+                            gameState = 'GAMEOVER';
+                            saveHighScore(Math.floor(score));
+                            finalScoreEl.textContent = Math.floor(score).toLocaleString();
+                            finalKillsEl.textContent = kills;
+                            finalHighScoreEl.textContent = highScore.toLocaleString();
+                            gameOverScreen.classList.remove('hidden');
+                            gameOverScreen.classList.add('flex');
+                        }
+                    }
+                    if (e.mesh.position.z > 10) { scene.remove(e.mesh); enemyFighters.splice(i, 1); }
+                }
+
+                // 적탄 이동
+                for (let i = enemyBullets.length - 1; i >= 0; i--) {
+                    const eb = enemyBullets[i];
+                    eb.position.z += eb.userData.vz;
+                    if (Math.abs(eb.position.x - currentX) < 0.9 && Math.abs(eb.position.z - currentZ) < 0.9) {
+                        scene.remove(eb); enemyBullets.splice(i, 1);
+                        shield -= 20;
+                        if (shield <= 0) {
+                            gameState = 'GAMEOVER';
+                            saveHighScore(Math.floor(score));
+                            finalScoreEl.textContent = Math.floor(score).toLocaleString();
+                            finalKillsEl.textContent = kills;
+                            finalHighScoreEl.textContent = highScore.toLocaleString();
+                            gameOverScreen.classList.remove('hidden');
+                            gameOverScreen.classList.add('flex');
+                        }
+                    }
+                    if (eb.position.z > 10) { scene.remove(eb); enemyBullets.splice(i, 1); }
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        document.getElementById('start-btn').addEventListener('click', startGame);
+        document.getElementById('retry-btn').addEventListener('click', startGame);
+
+        window.onload = () => { loadHighScore(); initThree(); requestAnimationFrame(animate); };
+    </script>
 </body>
 </html>
